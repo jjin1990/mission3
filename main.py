@@ -16,6 +16,22 @@ def judge(score_a, score_b, name_a, name_b):
     else:
         return name_b
 
+def select_mode():
+    print("=== Mini NPU Simulator ===")
+    print()
+    print("[모드 선택]")
+    print("1. 사용자 입력 (3x3)")
+    print("2. data.json 분석")
+    while True:
+        text = input("선택: ").strip()
+        if text == "1":
+            return "1"
+        elif text == "2":
+            return "2"
+        else:
+            print("1 또는 2를 입력하세요.")
+            
+
 x_pattern = [[1,0,1], [0,1,0], [1,0,1]]
 x_filter = [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
 cross_filter = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]
@@ -26,3 +42,5 @@ print(mac(x_pattern, cross_filter))
 print(judge(5, 1, "A", "B"))
 print(judge(3, 5, "A", "B"))
 print(judge(0.9, 0.8999999999999999, "A", "B"))
+
+print(select_mode())
