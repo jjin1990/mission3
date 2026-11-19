@@ -1,4 +1,5 @@
 import time
+import json
 
 def mac(pattern, filter_):
     n = len(pattern)
@@ -80,9 +81,119 @@ def run_mode1():
         print("판정: 판정 불가 (|A-B| < 1e-9)")
     else:
         print("판정:", result)
+
+def load_data(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def normalize_label(text):
+    t = str(text).strip().lower()
+    if t == "+" or t == "cross":
+        return "Cross"
+    elif t == "x":
+        return "X"
+    else:
+        return None
+
+
+def size_from_key(key):
+    return int(key.split("_")[1])
+
+
+def is_square(matrix, n):
+    if len(matrix) != n:
+        return False
+    for row in matrix:
+        if len(row) != n:
+            return False
+    return True
+
+def print_performance(filters):
+    print("크기\t평균 시간(ms)\t연산 횟수")
+    print("-" * 37)
+    cross_3 = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]
+    for n in [3, 5, 13, 25]:
+        if n == 3:
+            p = cross_3
+        else:
+            p = filters[n]["Cross"]
+        ms = measure_ms(p, p)
+        print(str(n) + "×" + str(n), "\t", round(ms, 3), "\t\t", n * n)
+
+
+def run_mode2():
+    try:
+        data = load_data("data.json")
+    except (FileNotFoundError, json.JSONDecodeError):
+        print("data.json을 읽을 수 없습니다.")
+        return
+
+    print("# [1] 필터 로드")
+    filters = {}
+    for size_key, pair in data["filters"].items():
+        n = size_from_key(size_key)
+        filters[n] = {}
+        for label, matrix in pair.items():
+            filters[n][normalize_label(label)] = matrix
+        print("✓", size_key, "필터 로드 완료 (Cross, X)")
+
+    print()
+    print("# [2] 패턴 분석 (라벨 정규화 적용)")
+    total = 0
+    passed = 0
+    fails = []
+    for key, case in data["patterns"].items():
+        total = total + 1
+        print("---", key, "---")
+        try:
+            n = size_from_key(key)
+            pattern = case["input"]
+            expected = normalize_label(case["expected"])
+        except (KeyError, ValueError, IndexError, TypeError):
+            print("FAIL (데이터 형식 오류)")
+            fails.append(key + ": 데이터 형식 오류(키·input·expected 확인)")
+            continue
+        if n not in filters:
+            print("FAIL (size_" + str(n) + " 필터 없음)")
+            fails.append(key + ": size_" + str(n) + " 필터 없음")
+            continue
+        if not is_square(pattern, n):
+            print("FAIL (크기 불일치)")
+            fails.append(key + ": 패턴 크기가 " + str(n) + "×" + str(n) + "이 아님")
+            continue
+        score_cross = mac(pattern, filters[n]["Cross"])
+        score_x = mac(pattern, filters[n]["X"])
+        result = judge(score_cross, score_x, "Cross", "X")
+        print("Cross 점수:", score_cross)
+        print("X 점수:", score_x)
+        if result == expected:
+            passed = passed + 1
+            print("판정:", result, "| expected:", expected, "| PASS")
+        else:                                           # 다르면
+            print("판정:", result, "| expected:", expected, "| FAIL")
+            if result == "UNDECIDED":
+                fails.append(key + ": 동점(UNDECIDED) 처리 규칙에 따라 FAIL")
+            else:
+                fails.append(key + ": 판정 " + result + "이 expected " + str(expected) + "와 다름")
+
+    print()
+    print("# [3] 성능 분석 (평균/10회)")
+    print_performance(filters)
+
+    print()
+    print("# [4] 결과 요약")
+    print("총 테스트:", total, "개")
+    print("통과:", passed, "개")
+    print("실패:", len(fails), "개")
+    if len(fails) > 0:
+        print()
+        print("실패 케이스:")
+        for f in fails:
+            print("-", f)
     
 mode = select_mode()
 if mode == "1":
     run_mode1()
 else:
-    print("모드 2는 준비 중입니다.")
+    run_mode2()
