@@ -30,7 +30,23 @@ def select_mode():
             return "2"
         else:
             print("1 또는 2를 입력하세요.")
-            
+
+ERROR_MSG = "입력 형식 오류: 각 줄에 3개의 숫자를 공백으로 구분해 입력하세요."
+
+def read_row(n):
+    while True:
+        parts = input().split()
+        if len(parts) != n:
+            print(ERROR_MSG)
+            continue
+        try:
+            row = []
+            for p in parts:
+                row.append(float(p))
+        except ValueError:
+            print(ERROR_MSG)
+            continue
+        return row
 
 x_pattern = [[1,0,1], [0,1,0], [1,0,1]]
 x_filter = [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
@@ -43,4 +59,6 @@ print(judge(5, 1, "A", "B"))
 print(judge(3, 5, "A", "B"))
 print(judge(0.9, 0.8999999999999999, "A", "B"))
 
-print(select_mode())
+#print(select_mode())
+
+print(read_row(3))
