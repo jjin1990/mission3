@@ -48,6 +48,13 @@ def read_row(n):
             continue
         return row
 
+def read_matrix(n, title):
+    print(title, "(" + str(n) + "줄 입력, 공백 구분)")
+    matrix = []
+    for i in range(n):
+        matrix.append(read_row(n))
+    return matrix
+
 x_pattern = [[1,0,1], [0,1,0], [1,0,1]]
 x_filter = [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
 cross_filter = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]
@@ -61,4 +68,6 @@ print(judge(0.9, 0.8999999999999999, "A", "B"))
 
 #print(select_mode())
 
-print(read_row(3))
+#print(read_row(3))
+
+print(read_matrix(3, "필터 A"))
