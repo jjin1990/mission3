@@ -1,3 +1,5 @@
+import time
+
 def mac(pattern, filter_):
     n = len(pattern)
     total = 0
@@ -55,19 +57,32 @@ def read_matrix(n, title):
         matrix.append(read_row(n))
     return matrix
 
-x_pattern = [[1,0,1], [0,1,0], [1,0,1]]
-x_filter = [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
-cross_filter = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]
+def measure_ms(pattern,filter_, repeat=10):
+    start = time.perf_counter()
+    for _ in range(repeat):
+        mac(pattern, filter_)
+    end = time.perf_counter()
+    return (end - start) * 1000 / repeat
 
-print(mac(x_pattern, x_filter))
-print(mac(x_pattern, cross_filter))
+def run_mode1():
+    filter_a = read_matrix(3, "필터 A")
+    filter_b = read_matrix(3, "필터 B")
+    pattern = read_matrix(3, "패턴")
 
-print(judge(5, 1, "A", "B"))
-print(judge(3, 5, "A", "B"))
-print(judge(0.9, 0.8999999999999999, "A", "B"))
+    score_a = mac(pattern, filter_a)
+    score_b = mac(pattern, filter_b)
+    result = judge(score_a, score_b, "A", "B")
 
-#print(select_mode())
-
-#print(read_row(3))
-
-print(read_matrix(3, "필터 A"))
+    print("A 점수:", score_a)
+    print("B 점수:", score_b)
+    print("연산 시간(평균/10회):", round(measure_ms(pattern, filter_a), 3), "ms")
+    if result == "UNDECIDED":
+        print("판정: 판정 불가 (|A-B| < 1e-9)")
+    else:
+        print("판정:", result)
+    
+mode = select_mode()
+if mode == "1":
+    run_mode1()
+else:
+    print("모드 2는 준비 중입니다.")
