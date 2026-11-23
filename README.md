@@ -236,4 +236,4 @@ if abs(score_a - score_b) < EPSILON:                 # 차이의 크기가 아�
 | GitHub 저장소 | https://github.com/jjin1990/mission3 (Public, `main`) |
 | 메인 실행 파일 | `main.py` |
 | README (실행 방법 + 결과 리포트) | 이 문서, [3. 실행 방법](#3-실행-방법), [6. 결과 리포트](#6-결과-리포트) |
-| 실행 사진 | `evidence/` 폴더 |
+| 실행 사진 | `evidence/` 폴더 |zzzz
