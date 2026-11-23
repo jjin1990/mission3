@@ -89,6 +89,48 @@ for i in range(n):                                   # 줄
 - `normalize_label`은 `strip().lower()`로 공백·대소문자를 맞춘 뒤 표준 라벨로 바꿉니다.
 - **왜?** 데이터 안에서 같은 뜻을 `+`와 `cross`처럼 다르게 쓰고 있어서, 그대로 비교하면 `"Cross" == "+"`가 False가 되어 맞게 판정해도 FAIL이 됩니다. 프로그램 안에서는 Cross/X 두 가지만 쓰고, 출력과 PASS/FAIL 비교도 이 기준으로 합니다.
 
+#### 라벨을 새로 추가할 때 (확장 절차)
+
+지금 라벨이 쓰이는 곳은 세 군데입니다.
+
+| 단계 | 위치 | 하는 일 |
+|---|---|---|
+| ① 표준화 | `normalize_label` | 여러 표기 → `Cross` / `X` (모르는 표기는 `None`) |
+| ② 필터 로드 | `run_mode2`의 `filters[n][normalize_label(label)] = matrix` | data.json 필터 키를 표준 라벨로 저장 |
+| ③ 판정·비교 | `run_mode2`의 `filters[n]["Cross"]`, `filters[n]["X"]`, `judge(…, "Cross", "X")`, `result == expected` | 표준 라벨 기준으로 점수 계산·PASS/FAIL |
+
+**경우 A. 같은 뜻의 표기만 늘어날 때** (예: expected에 `"plus"`가 들어옴)
+1. `normalize_label`의 조건에 표기를 추가합니다. (`if t == "+" or t == "cross" or t == "plus":`)
+2. ②·③은 표준 라벨(`Cross`)만 쓰므로 고칠 필요가 없습니다.
+
+**경우 B. 새 모양이 생길 때** (예: `T`)
+1. `normalize_label`에 새 표준 라벨을 돌려주는 조건을 추가합니다.
+2. data.json의 `filters`에 크기마다 새 키(예: `"t"`)와 필터를 넣습니다.
+3. `run_mode2`는 지금 `Cross`와 `X` 두 점수만 계산하므로, 라벨마다 점수를 계산하도록 바꿔야 합니다.
+4. `judge`는 두 점수를 비교하는 함수라, 세 개 이상에서 가장 큰 점수를 고르는 방식으로 바꾸고 동점 검사도 함께 해야 합니다.
+
+**검증 체크리스트**
+- [ ] `normalize_label`을 따로 불러 새 표기가 표준 라벨로 바뀌는지 확인
+- [ ] 모드 2 실행 시 "필터 로드 완료"에 새 라벨이 보이는지 확인
+- [ ] 새 라벨 케이스의 판정과 expected가 같은 표준 라벨로 출력되는지 확인
+- [ ] 결과 요약의 총·통과·실패 수가 케이스별 PASS/FAIL과 맞는지 확인
+
+**실제로 확인한 것** (`python3` 대화창에 `normalize_label`만 붙여 넣어 실행)
+
+```text
+>>> normalize_label("+")
+'Cross'
+>>> normalize_label(" CROSS ")
+'Cross'
+>>> normalize_label("X")
+'X'
+>>> print(normalize_label("plus"))
+None
+```
+
+![라벨 정규화 테스트](evidence/label-normalize-test.png)
+*공백·대소문자가 섞여도 표준 라벨로 바뀌고, 코드에 없는 표기(`plus`)는 `None`이 됩니다. 새 표기를 쓰려면 경우 A처럼 `normalize_label`에 먼저 추가해야 합니다.*
+
 ### 동점 처리 정책 (epsilon)
 
 ```python
@@ -236,4 +278,4 @@ if abs(score_a - score_b) < EPSILON:                 # 차이의 크기가 아�
 | GitHub 저장소 | https://github.com/jjin1990/mission3 (Public, `main`) |
 | 메인 실행 파일 | `main.py` |
 | README (실행 방법 + 결과 리포트) | 이 문서, [3. 실행 방법](#3-실행-방법), [6. 결과 리포트](#6-결과-리포트) |
-| 실행 사진 | `evidence/` 폴더 |zzzz
+| 실행 사진 | `evidence/` 폴더 |
