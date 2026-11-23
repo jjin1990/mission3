@@ -68,6 +68,7 @@ def measure_ms(pattern,filter_, repeat=10):
 def run_mode1():
     filter_a = read_matrix(3, "필터 A")
     filter_b = read_matrix(3, "필터 B")
+    print("필터 A, B 저장 완료")
     pattern = read_matrix(3, "패턴")
 
     score_a = mac(pattern, filter_a)
@@ -109,16 +110,38 @@ def is_square(matrix, n):
             return False
     return True
 
+def make_cross(n):
+    mid = n // 2
+    pattern = []
+    for i in range(n):
+        row = []
+        for j in range(n):
+            if i == mid or j == mid:
+                row.append(1.0)
+            else:
+                row.append(0.0)
+        pattern.append(row)
+    return pattern
+
+def make_x(n):
+    pattern = []
+    for i in range(n):
+        row = []
+        for j in range(n):
+            if i == j or i + j == n - 1:
+                row.append(1.0)
+            else:
+                row.append(0.0)
+        pattern.append(row)
+    return pattern
+
 def print_performance(filters):
     print("크기\t평균 시간(ms)\t연산 횟수")
     print("-" * 37)
-    cross_3 = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]
     for n in [3, 5, 13, 25]:
-        if n == 3:
-            p = cross_3
-        else:
-            p = filters[n]["Cross"]
-        ms = measure_ms(p, p)
+        p = make_x(n)
+        f = make_cross(n)
+        ms = measure_ms(p, f)
         print(str(n) + "×" + str(n), "\t", round(ms, 3), "\t\t", n * n)
 
 
