@@ -25,14 +25,17 @@ def select_mode():
     print("[모드 선택]")
     print("1. 사용자 입력 (3x3)")
     print("2. data.json 분석")
+    print("3. 패턴 생성기")
     while True:
         text = input("선택: ").strip()
         if text == "1":
             return "1"
         elif text == "2":
             return "2"
+        elif text == "3":
+            return "3"
         else:
-            print("1 또는 2를 입력하세요.")
+            print("1, 2, 3 중 하나를 입력하세요.")
 
 ERROR_MSG = "입력 형식 오류: 각 줄에 3개의 숫자를 공백으로 구분해 입력하세요."
 
@@ -214,9 +217,54 @@ def run_mode2():
         print("실패 케이스:")
         for f in fails:
             print("-", f)
-    
+
+def print_pattern(pattern):                         # 표를 ■ □ 그림으로 출력
+    for row in pattern:                             # 줄마다
+        line = ""                                   #   빈 글자에서 시작
+        for value in row:                           #   칸마다
+            if value == 1.0:                        #     1이면
+                line = line + "■ "                  #       칠한 칸
+            else:                                   #     0이면
+                line = line + "□ "                  #       빈칸
+        print(line)                                 #   한 줄 출력
+
+
+def read_size():                                    # 크기 N 입력받기 (read_row와 같은 모양)
+    while True:
+        text = input("패턴 크기 N (3 이상 정수): ").strip()
+        try:
+            n = int(text)                           # 글자 → 정수 ("abc"면 ValueError)
+        except ValueError:
+            print("숫자를 입력하세요.")
+            continue
+        if n < 3:                                   # 너무 작으면
+            print("3 이상을 입력하세요.")
+            continue
+        return n
+
+
+def run_generator():                                # 모드 3: 패턴 생성기
+    n = read_size()
+    cross = make_cross(n)                           # 생성기로 십자가 만들기
+    x = make_x(n)                                   # 생성기로 X 만들기
+    print()
+    print(str(n) + "×" + str(n), "십자가(Cross)")
+    print_pattern(cross)
+    print()
+    print(str(n) + "×" + str(n), "X")
+    print_pattern(x)
+    print()
+    print("생성한 X 패턴으로 MAC 판정")              # 생성한 패턴을 MAC에 재활용
+    score_cross = mac(x, cross)                     # X 패턴 × 십자가 필터
+    score_x = mac(x, x)                             # X 패턴 × X 필터
+    print("Cross 점수:", score_cross)
+    print("X 점수:", score_x)
+    print("판정:", judge(score_cross, score_x, "Cross", "X"))
+
 mode = select_mode()
 if mode == "1":
     run_mode1()
-else:
+elif mode == "2":
     run_mode2()
+else:
+    run_generator()
